@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment variables
+.env
+backend/.env
+frontend/.env
+*.env
+
+# Google Service Account Keys
+*.json
+!package.json
+!package-lock.json
+credentials.json
+
+# Build outputs
+backend/dist/
+frontend/build/
+frontend/.pnp
+frontend/.pnp.js
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+ml/__pycache__/
+ml/model.pkl
+
+# Testing
+coverage/
+.nyc_output
+
