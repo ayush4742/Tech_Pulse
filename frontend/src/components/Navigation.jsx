@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Home, LayoutDashboard, BookOpen, User, Trophy, Target, Bell, Search } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+import ProfileMenu from './ProfileMenu';
+import ProfilePanel from './ProfilePanel';
 
 const Navigation = () => {
   const navItems = [
@@ -11,6 +14,9 @@ const Navigation = () => {
     { name: 'Global Ranking', icon: Trophy, href: '#ranking' },
     { name: 'Learning & Future Plan', icon: Target, href: '#learning' },
   ];
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   return (
     <nav className="main-nav">
@@ -39,7 +45,7 @@ const Navigation = () => {
           })}
         </div>
 
-        <div className="nav-actions">
+        <div className="nav-actions" style={{ position: 'relative' }}>
           <div className="nav-search">
             <Search size={16} />
             <input type="search" placeholder="Search dashboard" />
@@ -48,11 +54,27 @@ const Navigation = () => {
             <Bell size={18} />
             <span className="notif-dot" />
           </button>
-          <div className="nav-avatar" title="User profile">
-            <div className="avatar-initials">NS</div>
-          </div>
+          <button
+            className="nav-avatar"
+            title="User profile"
+            aria-haspopup="dialog"
+            aria-expanded={isMenuOpen}
+            onClick={() => setIsMenuOpen((v) => !v)}
+            style={{ cursor: 'pointer' }}
+          >
+            <div className="avatar-initials">AK</div>
+          </button>
+
+          <AnimatePresence>
+            {isMenuOpen && (
+              <div style={{ position: 'absolute', right: 0, top: '52px' }}>
+                <ProfileMenu onClose={() => setIsMenuOpen(false)} onOpenProfile={() => setIsProfileOpen(true)} />
+              </div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
+      <ProfilePanel open={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
     </nav>
   );
 };
