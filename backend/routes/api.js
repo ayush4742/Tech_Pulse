@@ -77,5 +77,17 @@ router.get('/locations', async (req, res) => {
   }
 });
 
+// Tutorials insights
+router.get('/tutorials/insights', async (req, res) => {
+  try {
+    const framework = (req.query.framework || '').trim();
+    const data = await sheetsService.getTutorialInsights(framework || null);
+    res.json(data);
+  } catch (error) {
+    console.error('Error getting tutorials insights:', error);
+    res.status(500).json({ error: 'Failed to fetch tutorials insights' });
+  }
+});
+
 module.exports = router;
 

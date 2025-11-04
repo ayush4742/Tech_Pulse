@@ -285,6 +285,101 @@ class SheetsService {
   }
 
   /**
+   * Compute tutorials insights: overall and per-framework
+   */
+  async getTutorialInsights(frameworkFilter = null) {
+    // Prefer explicit columns by letter: H (framework), I (tool), J (online source)
+    // We'll read raw rows to ensure column indexing regardless of headers
+    const rows = await this.fetchAllRows();
+    if (!rows || rows.length === 0) {
+      return { overall: { frameworks: [], learningMethods: [], onlineSources: [] }, perFramework: null };
+    }
+
+    // Skip header row (row 0)
+    const dataRows = rows.slice(1);
+    const COL_H = 7; // Framework name
+    const COL_I = 8; // Most used tool for that respondent
+    const COL_J = 9; // Most used online source for that respondent
+
+    const normalize = (v) => String(v || '').trim();
+    const toKey = (s) => normalize(s).toLowerCase();
+    const isMeaningful = (s) => {
+      const v = toKey(s);
+      return v && v !== 'na' && v !== 'n/a' && v !== 'none' && v !== 'null';
+    };
+    const titleCase = (s) => String(s).replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.slice(1));
+    const countMap = (map, key) => {
+      if (!isMeaningful(key)) return;
+      const k = toKey(key);
+      map[k] = (map[k] || 0) + 1;
+    };
+
+    const splitList = (val) => String(val || '')
+      .split(/[;,\/\n|]+/)
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    // Build overall frameworks list from H (split multiple values)
+    const frameworkCounts = {};
+    dataRows.forEach(r => {
+      const list = splitList(r[COL_H]);
+      list.forEach(fw => {
+        if (!isMeaningful(fw)) return;
+        const k = toKey(fw);
+        frameworkCounts[k] = (frameworkCounts[k] || 0) + 1;
+      });
+    });
+
+    const toSortedArray = (m) => Object.entries(m)
+      .map(([name, count]) => ({ name: titleCase(name), count }))
+      .sort((a, b) => b.count - a.count);
+
+    const overall = {
+      frameworks: toSortedArray(frameworkCounts)
+    };
+
+    if (frameworkFilter) {
+      const fwKey = toKey(frameworkFilter);
+      const toolCounts = {};
+      const sourceCounts = {};
+
+      dataRows.forEach(r => {
+        const list = splitList(r[COL_H]);
+        const matches = list.some(fw => isMeaningful(fw) && toKey(fw) === fwKey);
+        if (!matches) return;
+        const tool = r[COL_I];
+        const source = r[COL_J];
+        if (isMeaningful(tool)) {
+          // Split multi-valued tools and count individually
+          splitList(tool).forEach(t => countMap(toolCounts, t));
+        }
+        if (isMeaningful(source)) {
+          // Split multi-valued sources and count individually
+          splitList(source).forEach(s => countMap(sourceCounts, s));
+        }
+      });
+
+      const sortedTools = toSortedArray(toolCounts);
+      const topTool = sortedTools[0] || null;
+      const otherTools = sortedTools.slice(1);
+      const topOnlineSource = toSortedArray(sourceCounts)[0] || null;
+
+      return {
+        overall,
+        framework: titleCase(frameworkFilter),
+        topTool,
+        topOnlineSource,
+        otherTools
+      };
+    }
+
+    // Fallback: also compute generic insights if needed (kept minimal here)
+    return { overall, perFramework: null };
+
+    
+  }
+
+  /**
    * Get all aggregated data for dashboard
    */
   async getAllAggregatedData() {

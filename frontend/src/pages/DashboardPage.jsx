@@ -1,35 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play } from 'lucide-react';
-import Navigation from './components/Navigation';
-import HeroSection from './components/HeroSection';
-import RealTimeCounter from './components/RealTimeCounter';
-import TechUsageChart from './components/TechUsageChart';
-import LearningInterests from './components/LearningInterests';
-import AIUsageChart from './components/AIUsageChart';
-import LocationMap from './components/LocationMap';
-import MLPredictions from './components/MLPredictions';
-import TutorialsPage from './components/TutorialsPage';
-import { apiService } from './services/api';
-import './App.css';
+import RealTimeCounter from '../components/RealTimeCounter';
+import TechUsageChart from '../components/TechUsageChart';
+import LearningInterests from '../components/LearningInterests';
+import AIUsageChart from '../components/AIUsageChart';
+import LocationMap from '../components/LocationMap';
+import MLPredictions from '../components/MLPredictions';
+import HeroSection from '../components/HeroSection';
+import { apiService } from '../services/api';
 
-function App() {
-  useEffect(() => {
-    // Check API connection (for future use)
-    const checkHealth = async () => {
-      try {
-        await apiService.healthCheck();
-      } catch (error) {
-        console.error('API health check failed:', error);
-      }
-    };
-
-    checkHealth();
-    const interval = setInterval(checkHealth, 10000); // Check every 10s
-
-    return () => clearInterval(interval);
-  }, []);
-
+const DashboardPage = () => {
   const [totalCount, setTotalCount] = useState(null);
 
   useEffect(() => {
@@ -38,9 +19,7 @@ function App() {
       try {
         const res = await apiService.getCount();
         if (mounted) setTotalCount(res.count);
-      } catch (err) {
-        // ignore
-      }
+      } catch {}
     };
     fetch();
     const iv = setInterval(fetch, 5000);
@@ -48,9 +27,7 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
-      <Navigation />
-      
+    <>
       <section id="home">
         <HeroSection />
       </section>
@@ -76,11 +53,7 @@ function App() {
                   <div className="stat-number">{totalCount !== null ? totalCount.toLocaleString() : '...'}</div>
                   <div className="stat-sub">Total Responses (live)</div>
                 </div>
-                <motion.button
-                  className="card-button primary"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                <motion.button className="card-button primary" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Play size={16} />
                   Explore Data
                 </motion.button>
@@ -168,16 +141,10 @@ function App() {
           </motion.div>
         </div>
       </main>
-
-      {/* Dedicated Tutorials section */}
-      <TutorialsPage />
-
-      <footer className="app-footer">
-        <p>Built with ❤️ for TechPulse | Real-time analytics from live survey responses</p>
-      </footer>
-    </div>
+    </>
   );
-}
+};
 
-export default App;
+export default DashboardPage;
+
 
