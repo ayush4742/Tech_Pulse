@@ -103,6 +103,18 @@ export const apiService = {
       throw error;
     }
   },
+
+  // Get Tutorials insights (optionally for one framework)
+  async getTutorialInsights(framework) {
+    try {
+      const params = framework ? { framework } : undefined;
+      const response = await api.get('/tutorials/insights', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get tutorials insights:', error);
+      throw error;
+    }
+  },
 };
 
 export default apiService;
