@@ -10,6 +10,7 @@ import AIUsageChart from './components/AIUsageChart';
 import LocationMap from './components/LocationMap';
 import MLPredictions from './components/MLPredictions';
 import TutorialsPage from './components/TutorialsPage';
+import GlobalRankingPage from './components/GlobalRankingPage';
 import { apiService } from './services/api';
 import './App.css';
 
@@ -88,7 +89,13 @@ function App() {
             </div>
 
             {/* Row 2: Global Ranking and Learning Plan */}
-            <div className="dashboard-card ranking-card card-small">
+            <motion.a
+              href="#ranking"
+              className="dashboard-card ranking-card card-small"
+              style={{ textDecoration: 'none', display: 'block' }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
               <div className="card-header">
                 <h3><span className="heading-icon">🏆</span> Global Ranking</h3>
               </div>
@@ -100,17 +107,12 @@ function App() {
                   </div>
                   <div className="ranking-list">
                     <div className="rank-entry">
-                      <span>Your Profile</span>
-                      <span className="rank-number">#1</span>
-                    </div>
-                    <div className="rank-entry">
-                      <span>Example College</span>
-                      <span className="rank-number">#2</span>
+                      <span>View Full Rankings →</span>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.a>
 
             <div className="dashboard-card learning-card card-medium">
               <div className="card-header">
@@ -171,6 +173,9 @@ function App() {
 
       {/* Dedicated Tutorials section */}
       <TutorialsPage />
+
+      {/* Global Ranking section */}
+      <GlobalRankingPage />
 
       <footer className="app-footer">
         <p>Built with ❤️ for TechPulse | Real-time analytics from live survey responses</p>

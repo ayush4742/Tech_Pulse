@@ -1,0 +1,322 @@
+/* Global Ranking Page - Matching Home Page Color Scheme */
+.ranking-page {
+  background: linear-gradient(135deg, rgba(16, 40, 66, 0.95), rgba(11, 26, 44, 0.95));
+  min-height: 100vh;
+  padding: 2rem 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(79, 195, 247, 0.04);
+  box-shadow: inset 0 -24px 60px rgba(0, 0, 0, 0.3);
+}
+
+.ranking-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.ranking-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.ranking-title-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ranking-title-icon {
+  color: var(--accent);
+  filter: drop-shadow(0 0 10px rgba(79, 195, 247, 0.5));
+}
+
+.ranking-title {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent-light), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.ranking-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.ranking-loading,
+.ranking-error,
+.ranking-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-secondary);
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(79, 195, 247, 0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.ranking-error {
+  color: var(--danger);
+}
+
+.ranking-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ranking-empty svg {
+  color: var(--accent);
+  opacity: 0.5;
+}
+
+.ranking-table-container {
+  background: var(--bg-card);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.ranking-table {
+  width: 100%;
+}
+
+.ranking-table-header {
+  display: grid;
+  grid-template-columns: 100px 1fr 1.5fr 200px;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(79, 195, 247, 0.08);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ranking-table-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ranking-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 1.5fr 200px;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(26, 47, 79, 0.5);
+  border: 1px solid rgba(79, 195, 247, 0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  align-items: center;
+}
+
+.ranking-row:hover {
+  background: rgba(79, 195, 247, 0.08);
+  border-color: rgba(79, 195, 247, 0.3);
+  transform: translateX(4px);
+}
+
+.ranking-row.top-rank {
+  background: linear-gradient(135deg, rgba(79, 195, 247, 0.15), rgba(129, 212, 250, 0.08));
+  border-color: rgba(79, 195, 247, 0.3);
+  box-shadow: 0 4px 16px rgba(79, 195, 247, 0.2);
+}
+
+.rank-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rank-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(79, 195, 247, 0.1);
+  border: 1px solid rgba(79, 195, 247, 0.2);
+  border-radius: 8px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.rank-badge.gold {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1));
+  border-color: rgba(255, 215, 0, 0.4);
+  color: #ffd700;
+}
+
+.rank-badge.silver {
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(192, 192, 192, 0.1));
+  border-color: rgba(192, 192, 192, 0.4);
+  color: #c0c0c0;
+}
+
+.rank-badge.bronze {
+  background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(205, 127, 50, 0.1));
+  border-color: rgba(205, 127, 50, 0.4);
+  color: #cd7f32;
+}
+
+.rank-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.rank-icon.gold {
+  color: #ffd700;
+}
+
+.rank-icon.silver {
+  color: #c0c0c0;
+}
+
+.rank-icon.bronze {
+  color: #cd7f32;
+}
+
+.rank-number {
+  font-size: 1rem;
+}
+
+.name-cell {
+  display: flex;
+  align-items: center;
+}
+
+.name-text {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.college-cell,
+.time-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.college-icon,
+.time-icon {
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+.college-text,
+.time-text {
+  flex: 1;
+}
+
+.ranking-footer {
+  text-align: center;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(79, 195, 247, 0.1);
+}
+
+.ranking-footer-text {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.ranking-footer-text strong {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.ranking-footer-note {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .ranking-table-header,
+  .ranking-row {
+    grid-template-columns: 80px 1fr 1.5fr 180px;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .ranking-title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .ranking-page {
+    padding: 1.5rem 1rem;
+  }
+
+  .ranking-title {
+    font-size: 2rem;
+  }
+
+  .ranking-table-header {
+    display: none;
+  }
+
+  .ranking-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .rank-cell {
+    justify-content: flex-start;
+  }
+
+  .name-cell,
+  .college-cell,
+  .time-cell {
+    justify-content: flex-start;
+  }
+
+  .name-cell::before {
+    content: 'Name: ';
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-right: 0.5rem;
+  }
+
+  .college-cell::before {
+    content: 'College: ';
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-right: 0.5rem;
+  }
+
+  .time-cell::before {
+    content: 'Submitted: ';
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-right: 0.5rem;
+  }
+}
+

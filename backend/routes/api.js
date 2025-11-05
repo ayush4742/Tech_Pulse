@@ -89,5 +89,16 @@ router.get('/tutorials/insights', async (req, res) => {
   }
 });
 
+// Get global ranking
+router.get('/ranking', async (req, res) => {
+  try {
+    const ranking = await sheetsService.getRanking();
+    res.json(ranking);
+  } catch (error) {
+    console.error('Error getting ranking:', error);
+    res.status(500).json({ error: 'Failed to fetch ranking' });
+  }
+});
+
 module.exports = router;
 
