@@ -115,6 +115,17 @@ export const apiService = {
       throw error;
     }
   },
+
+  // Get global ranking
+  async getRanking() {
+    try {
+      const response = await api.get('/ranking');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get ranking:', error);
+      throw error;
+    }
+  },
 };
 
 export default apiService;

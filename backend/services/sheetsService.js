@@ -380,6 +380,90 @@ class SheetsService {
   }
 
   /**
+   * Get ranking of users based on submission timestamp
+   * Ranks users by when they submitted data (earliest = rank 1)
+   */
+  async getRanking() {
+    try {
+      const rows = await this.fetchAllRows();
+      if (!rows || rows.length < 2) {
+        return [];
+      }
+
+      const headers = rows[0].map(h => h.trim().toLowerCase());
+      const data = [];
+
+      // Find column indices
+      const timestampIndex = headers.findIndex(h => 
+        h.includes('timestamp') || h.includes('time')
+      );
+      const nameIndex = headers.findIndex(h => 
+        h.includes('name') && !h.includes('college') && !h.includes('company')
+      );
+      const emailIndex = headers.findIndex(h => h.includes('email'));
+      const collegeIndex = headers.findIndex(h => 
+        h.includes('college') || h.includes('company')
+      );
+
+      // Process each data row
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || row.length === 0) continue;
+
+        const timestamp = row[timestampIndex] || '';
+        const name = row[nameIndex] || row[emailIndex] || 'Anonymous';
+        const college = row[collegeIndex] || 'Not specified';
+
+        // Skip if no timestamp
+        if (!timestamp) continue;
+
+        // Parse timestamp (Google Forms format: MM/DD/YYYY HH:MM:SS)
+        let timestampMs;
+        try {
+          const date = new Date(timestamp);
+          timestampMs = date.getTime();
+          
+          // If date parsing fails, try alternative formats
+          if (isNaN(timestampMs)) {
+            // Try different date formats
+            const parts = timestamp.split(/[\s\/\-]/);
+            if (parts.length >= 3) {
+              timestampMs = new Date(timestamp).getTime();
+            }
+          }
+        } catch (e) {
+          console.warn(`Could not parse timestamp: ${timestamp}`);
+          continue;
+        }
+
+        if (!isNaN(timestampMs)) {
+          data.push({
+            name: name.trim() || 'Anonymous',
+            college: college.trim() || 'Not specified',
+            timestamp: timestamp.trim(),
+            timestampMs: timestampMs
+          });
+        }
+      }
+
+      // Sort by timestamp (earliest first = rank 1)
+      data.sort((a, b) => a.timestampMs - b.timestampMs);
+
+      // Add rank numbers
+      return data.map((entry, index) => ({
+        rank: index + 1,
+        name: entry.name,
+        college: entry.college,
+        timestamp: entry.timestamp
+      }));
+
+    } catch (error) {
+      console.error('Error getting ranking:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get all aggregated data for dashboard
    */
   async getAllAggregatedData() {
