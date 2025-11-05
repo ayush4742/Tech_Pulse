@@ -126,6 +126,40 @@ export const apiService = {
       throw error;
     }
   },
+
+  // Update a user's progress score used for ranking
+  async setUserScore(userId, score) {
+    try {
+      const response = await api.post('/ranking/score', { userId, score });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to set user score:', error);
+      throw error;
+    }
+  },
+
+  // Get a user's profile by email or name
+  async getUserProfile({ email, name }) {
+    try {
+      const params = email ? { email } : { name };
+      const response = await api.get('/profile', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get user profile:', error);
+      throw error;
+    }
+  },
+
+  // Update a user's profile row
+  async updateUserProfile({ identifier, updates }) {
+    try {
+      const response = await api.post('/profile', { identifier, updates });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to update user profile:', error);
+      throw error;
+    }
+  },
 };
 
 export default apiService;

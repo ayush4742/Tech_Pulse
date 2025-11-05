@@ -6,6 +6,7 @@ import HeroSection from './components/HeroSection';
 import RealTimeCounter from './components/RealTimeCounter';
 import TechUsageChart from './components/TechUsageChart';
 import LearningInterests from './components/LearningInterests';
+import LearningPlanPage from './components/LearningPlanPage';
 import AIUsageChart from './components/AIUsageChart';
 import LocationMap from './components/LocationMap';
 import MLPredictions from './components/MLPredictions';
@@ -114,23 +115,7 @@ function App() {
               </div>
             </motion.a>
 
-            <div className="dashboard-card learning-card card-medium">
-              <div className="card-header">
-                <h3><span className="heading-icon">🎯</span> Learning & Future Plan</h3>
-              </div>
-              <div className="card-content">
-                <div className="learning-items">
-                  <div className="learning-item">
-                    <h4>Frontend</h4>
-                    <p>Upcoming skill in high demand</p>
-                  </div>
-                  <div className="learning-item">
-                    <h4>AI/ML</h4>
-                    <p>Emerging technology</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Learning & Future Plan moved to its own section below */}
 
             {/* Row 3: Charts and Analytics */}
             <div className="dashboard-card full-width card-large">
@@ -173,6 +158,9 @@ function App() {
 
       {/* Dedicated Tutorials section */}
       <TutorialsPage />
+
+      {/* Learning & Future Plan section */}
+      <LearningPlanPage />
 
       {/* Global Ranking section */}
       <GlobalRankingPage />

@@ -12,6 +12,8 @@ class SheetsService {
     this.cache = null;
     this.lastFetchTime = null;
     this.cacheDuration = 5000; // 5 seconds cache
+    // Simple in-memory progress scores (replace with DB in production)
+    this.userScores = new Map(); // key: lowercase user identifier (e.g., name/email), value: 0-100
   }
 
   async initialize() {
@@ -380,6 +382,135 @@ class SheetsService {
   }
 
   /**
+   * Fetch a single user's profile details from sheet by email or name
+   */
+  async getUserProfile({ email = null, name = null } = {}) {
+    const rows = await this.getData();
+    if (!rows || rows.length === 0) return null;
+
+    const toKey = (s) => String(s || '').trim().toLowerCase();
+
+    const findKey = (obj, candidates) => {
+      const keys = Object.keys(obj);
+      const lower = keys.reduce((m, k) => { m[k.toLowerCase()] = k; return m; }, {});
+      for (const c of candidates) {
+        const hit = lower[c.toLowerCase()];
+        if (hit) return hit;
+      }
+      return null;
+    };
+
+    let match = null;
+    for (const row of rows) {
+      const nameKey = findKey(row, ['name', 'full name', 'your name']);
+      const emailKey = findKey(row, ['email', 'email address']);
+      const rowName = nameKey ? row[nameKey] : '';
+      const rowEmail = emailKey ? row[emailKey] : '';
+      if (email && toKey(rowEmail) === toKey(email)) { match = row; break; }
+      if (!match && name && toKey(rowName) === toKey(name)) { match = row; }
+    }
+
+    if (!match) return null;
+
+    const nameKey = Object.keys(match).find(k => /name/i.test(k) && !/college|company/i.test(k));
+    const emailKey = Object.keys(match).find(k => /email/i.test(k));
+    const phoneKey = Object.keys(match).find(k => /(phone|mobile|contact)/i.test(k));
+    const ageKey = Object.keys(match).find(k => /(age|which age group)/i.test(k));
+    const orgKey = Object.keys(match).find(k => /(college|company|organization)/i.test(k));
+    const locationKey = Object.keys(match).find(k => /(location|city)/i.test(k));
+
+    return {
+      name: (nameKey && match[nameKey]) || null,
+      email: (emailKey && match[emailKey]) || null,
+      phone: (phoneKey && match[phoneKey]) || null,
+      age: (ageKey && match[ageKey]) || null,
+      organization: (orgKey && match[orgKey]) || null,
+      location: (locationKey && match[locationKey]) || null,
+    };
+  }
+
+  numberToColumn(n) {
+    let s = '';
+    while (n > 0) {
+      const m = (n - 1) % 26;
+      s = String.fromCharCode(65 + m) + s;
+      n = Math.floor((n - 1) / 26);
+    }
+    return s;
+  }
+
+  /**
+   * Update user profile fields in the sheet (by email or name)
+   */
+  async updateUserProfile({ identifier, updates }) {
+    if (!identifier || !updates) throw new Error('identifier and updates required');
+
+    // Work with raw rows for precise column updates
+    const sheetName = await this.getFirstSheetName();
+    const rows = await this.fetchAllRows(sheetName);
+    if (!rows || rows.length < 2) throw new Error('Sheet empty');
+
+    const headers = rows[0].map(h => String(h || '').trim());
+    const lowerHeaders = headers.map(h => h.toLowerCase());
+
+    const idxOf = (predicates) => {
+      for (let i = 0; i < lowerHeaders.length; i++) {
+        const h = lowerHeaders[i];
+        if (predicates.some(p => h.includes(p))) return i;
+      }
+      return -1;
+    };
+
+    const emailIdx = idxOf(['email']);
+    const nameIdx = idxOf(['name']);
+
+    // Find target row
+    const ident = String(identifier).trim().toLowerCase();
+    let rowIndex = -1; // zero-based
+    for (let r = 1; r < rows.length; r++) {
+      const rEmail = emailIdx >= 0 ? String(rows[r][emailIdx] || '').trim().toLowerCase() : '';
+      const rName = nameIdx >= 0 ? String(rows[r][nameIdx] || '').trim().toLowerCase() : '';
+      if (ident && (ident === rEmail || ident === rName)) { rowIndex = r; break; }
+    }
+    if (rowIndex < 0) throw new Error('User row not found');
+
+    // Column indices for updatable fields
+    const nameCol = nameIdx;
+    const phoneCol = idxOf(['phone', 'mobile', 'contact']);
+    const ageCol = idxOf(['age', 'which age group']);
+    const orgCol = idxOf(['college', 'company', 'organization']);
+    const locationCol = idxOf(['location', 'city']);
+
+    const apply = (colIdx, key) => {
+      if (colIdx >= 0 && Object.prototype.hasOwnProperty.call(updates, key)) {
+        rows[rowIndex][colIdx] = updates[key];
+      }
+    };
+
+    apply(nameCol, 'name');
+    // email change (if supplied and column exists)
+    if (emailIdx >= 0 && Object.prototype.hasOwnProperty.call(updates, 'email')) {
+      rows[rowIndex][emailIdx] = updates.email;
+    }
+    apply(phoneCol, 'phone');
+    apply(ageCol, 'age');
+    apply(orgCol, 'organization');
+    apply(locationCol, 'location');
+
+    // Compute range for the entire row and write back
+    const lastColLetter = this.numberToColumn(headers.length);
+    const range = `${sheetName}!A${rowIndex + 1}:${lastColLetter}${rowIndex + 1}`;
+    await this.sheets.spreadsheets.values.update({
+      spreadsheetId: this.sheetId,
+      range,
+      valueInputOption: 'USER_ENTERED',
+      requestBody: { values: [rows[rowIndex]] }
+    });
+
+    return { ok: true };
+  }
+
+  /**
    * Get ranking of users based on submission timestamp
    * Ranks users by when they submitted data (earliest = rank 1)
    */
@@ -446,21 +577,54 @@ class SheetsService {
         }
       }
 
-      // Sort by timestamp (earliest first = rank 1)
-      data.sort((a, b) => a.timestampMs - b.timestampMs);
+      // Attach score from in-memory map if available
+      const withScores = data.map((entry) => {
+        const key = String(entry.name || '').toLowerCase();
+        const score = this.userScores.get(key);
+        return { ...entry, score: typeof score === 'number' ? score : null };
+      });
+
+      // Sort: if any scores exist, sort by score desc; otherwise by timestamp asc
+      const hasAnyScores = withScores.some(e => typeof e.score === 'number');
+      if (hasAnyScores) {
+        withScores.sort((a, b) => {
+          const as = typeof a.score === 'number' ? a.score : -Infinity;
+          const bs = typeof b.score === 'number' ? b.score : -Infinity;
+          if (bs !== as) return bs - as;
+          return a.timestampMs - b.timestampMs;
+        });
+      } else {
+        withScores.sort((a, b) => a.timestampMs - b.timestampMs);
+      }
 
       // Add rank numbers
-      return data.map((entry, index) => ({
+      return withScores.map((entry, index) => ({
         rank: index + 1,
         name: entry.name,
         college: entry.college,
-        timestamp: entry.timestamp
+        timestamp: entry.timestamp,
+        score: entry.score ?? undefined,
       }));
 
     } catch (error) {
       console.error('Error getting ranking:', error);
       throw error;
     }
+  }
+
+  /**
+   * Update a user's progress score used for ranking
+   */
+  setUserScore(userId, score) {
+    if (!userId || typeof score !== 'number') return null;
+    const key = String(userId).toLowerCase();
+    const clamped = Math.max(0, Math.min(100, Math.round(score)));
+    this.userScores.set(key, clamped);
+    return { userId: key, score: clamped };
+  }
+
+  getUserScores() {
+    return Array.from(this.userScores.entries()).map(([userId, score]) => ({ userId, score }));
   }
 
   /**

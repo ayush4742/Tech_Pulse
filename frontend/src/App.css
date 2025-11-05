@@ -232,6 +232,15 @@
 .stat-title { font-size: 0.8rem; color: var(--text-secondary); }
 .stat-value { font-weight: 800; }
 
+.profile-input {
+  width: 100%;
+  background: rgba(79,195,247,0.06);
+  border: 1px solid rgba(79,195,247,0.2);
+  color: var(--text-primary);
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+}
+
 .profile-heatmap { display: grid; grid-template-columns: repeat(28, 10px); gap: 4px; }
 .heat-cell { width: 10px; height: 10px; border-radius: 2px; background: rgba(79,195,247,0.08); }
 .heat-cell.level-1 { background: rgba(79,195,247,0.18); }

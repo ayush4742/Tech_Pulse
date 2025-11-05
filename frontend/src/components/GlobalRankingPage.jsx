@@ -110,6 +110,7 @@ const GlobalRankingPage = () => {
                 <div className="rank-header-cell">Rank</div>
                 <div className="name-header-cell">Name</div>
                 <div className="college-header-cell">College</div>
+                <div className="score-header-cell">Score</div>
                 <div className="time-header-cell">Submitted</div>
               </div>
               <div className="ranking-table-body">
@@ -133,6 +134,9 @@ const GlobalRankingPage = () => {
                     <div className="college-cell">
                       <GraduationCap className="college-icon" size={16} />
                       <span className="college-text">{entry.college}</span>
+                    </div>
+                    <div className="score-cell">
+                      <span className="score-badge">{typeof entry.score === 'number' ? entry.score : '-'}</span>
                     </div>
                     <div className="time-cell">
                       <Clock className="time-icon" size={16} />

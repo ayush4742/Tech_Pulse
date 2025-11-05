@@ -100,5 +100,54 @@ router.get('/ranking', async (req, res) => {
   }
 });
 
+// Update a user's progress score (0-100) used for ranking
+router.post('/ranking/score', async (req, res) => {
+  try {
+    const { userId, score } = req.body || {};
+    const result = sheetsService.setUserScore(userId, Number(score));
+    if (!result) return res.status(400).json({ error: 'userId and numeric score are required' });
+    res.json({ ok: true, ...result });
+  } catch (error) {
+    console.error('Error setting user score:', error);
+    res.status(500).json({ error: 'Failed to set user score' });
+  }
+});
+
+// (Optional) Get all user scores (for debugging/admin)
+router.get('/ranking/scores', (req, res) => {
+  try {
+    res.json(sheetsService.getUserScores());
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch scores' });
+  }
+});
+
+// Get a user's profile (by email or name)
+router.get('/profile', async (req, res) => {
+  try {
+    const { email, name } = req.query || {};
+    if (!email && !name) return res.status(400).json({ error: 'email or name is required' });
+    const profile = await sheetsService.getUserProfile({ email, name });
+    if (!profile) return res.status(404).json({ error: 'User not found' });
+    res.json(profile);
+  } catch (error) {
+    console.error('Error getting profile:', error);
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
+});
+
+// Update a user's profile
+router.post('/profile', async (req, res) => {
+  try {
+    const { identifier, updates } = req.body || {};
+    if (!identifier || !updates) return res.status(400).json({ error: 'identifier and updates are required' });
+    const result = await sheetsService.updateUserProfile({ identifier, updates });
+    res.json(result);
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
 module.exports = router;
 
