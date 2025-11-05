@@ -17,6 +17,7 @@ const Navigation = () => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [profileView, setProfileView] = useState(null);
   const [activeHash, setActiveHash] = useState(typeof window !== 'undefined' ? (window.location.hash || '#home') : '#home');
 
   useEffect(() => {
@@ -45,7 +46,16 @@ const Navigation = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
                 whileHover={{ scale: 1.05 }}
-                onClick={() => setActiveHash(item.href)}
+                onClick={(e) => {
+                  if (item.name === 'Profile') {
+                    e.preventDefault();
+                    setIsProfileOpen(true);
+                    setIsMenuOpen(false);
+                    setActiveHash('#profile');
+                    return;
+                  }
+                  setActiveHash(item.href);
+                }}
               >
                 <Icon size={16} />
                 <span>{item.name}</span>
@@ -77,13 +87,17 @@ const Navigation = () => {
           <AnimatePresence>
             {isMenuOpen && (
               <div style={{ position: 'absolute', right: 0, top: '52px' }}>
-                <ProfileMenu onClose={() => setIsMenuOpen(false)} onOpenProfile={() => setIsProfileOpen(true)} />
+                <ProfileMenu
+                  onClose={() => setIsMenuOpen(false)}
+                  onOpenProfile={() => { setProfileView(null); setIsProfileOpen(true); }}
+                  onOpenSection={(section) => { setProfileView(section); setIsProfileOpen(true); setIsMenuOpen(false); }}
+                />
               </div>
             )}
           </AnimatePresence>
         </div>
       </div>
-      <ProfilePanel open={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+      <ProfilePanel open={isProfileOpen} onClose={() => setIsProfileOpen(false)} view={profileView} />
     </nav>
   );
 };

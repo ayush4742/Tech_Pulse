@@ -18,7 +18,7 @@ const linkItems = [
   { label: 'Sign Out', icon: LogOut, danger: true },
 ];
 
-const ProfileMenu = ({ onClose, onOpenProfile }) => {
+const ProfileMenu = ({ onClose, onOpenProfile, onOpenSection }) => {
   const panelRef = useRef(null);
 
   useEffect(() => {
@@ -58,8 +58,16 @@ const ProfileMenu = ({ onClose, onOpenProfile }) => {
       <div className="profile-menu-quick">
         {quickItems.map((q) => {
           const Icon = q.icon;
+          const onClick = () => {
+            if (q.label === 'Progress') {
+              onOpenSection?.('progress');
+            } else {
+              onOpenProfile?.();
+            }
+            onClose?.();
+          };
           return (
-            <button key={q.label} className="profile-quick-item" type="button">
+            <button key={q.label} className="profile-quick-item" type="button" onClick={onClick}>
               <div className="profile-quick-icon"><Icon size={18} /></div>
               <div className="profile-quick-label">{q.label}</div>
             </button>
